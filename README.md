@@ -1,6 +1,6 @@
 
-Termux (Android) LibUSB-1.0 adapter (?)
-=======================================
+Termux (Android) LibUSB-1.0 Python 3 adapter (?)
+================================================
 
 See USB infos in termux wiki;
 - [example code and termux-usb reference](https://wiki.termux.com/wiki/Termux-usb)
