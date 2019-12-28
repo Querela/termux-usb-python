@@ -48,7 +48,12 @@ pip install -r requirements.txt
 - test scripts supplied for various _simple_ situations; tests currently only with connected device
 - example usage script for _DSO138mini_ data dumps
 
-## License
+## Copyright and License Information
 
-Hopefully my _fix_ can be adopted in the original library. Else, free for all. :-)
+Hopefully my _fix_ can be adopted in the original PyUSB library. Else, free for all. :-)
 
+Copyright (c) 2019 Querela. All rights reserved.
+
+See the file "LICENSE" for information on the history of this software, terms & conditions for usage, and a DISCLAIMER OF ALL WARRANTIES.
+
+All trademarks referenced herein are property of their respective holders.
