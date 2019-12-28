@@ -1,0 +1,15 @@
+# core lib, libusb1.0 interface
+pyusb
+
+# for hexline(), hexdump()
+pyftdi
+
+# unused?, just to test and compare
+pyserial
+
+# shell, see in scrapy ...
+IPython
+
+# check + format
+flake8
+black
