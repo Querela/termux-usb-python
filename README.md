@@ -19,6 +19,12 @@ termux-usb -r -e ./usbtest_rw1.py.sh /dev/bus/usb/001/002
 
 ## Setup
 
+Working with **Python 3.8**.
+
+Theoretically only needs `PyUSB`.
+Enganced with `IPython`, `PyFtdi` (two formatting functions).
+Style check and formatting with `Flake8` and `Black`.
+
 Create environment:
 
 ```bash
@@ -32,7 +38,7 @@ pip install -r requirements.txt
 - Android restricts device access, [see comments on libusb](https://sourceforge.net/p/libusb/mailman/message/36486446/)
 - Termux only provides a file descriptor (probably queried from Android)
 - device handles etc. have to be retrieved from a single file descriptor
-- my module `usblib.py` provides a function `device_from_fd(fd)` that extends the [`pyusb`](https://github.com/pyusb/pyusb) library to provide a `Device` object from a file descriptor number that can be used as usual
+- my module `usblib.py` provides a function `device_from_fd(fd)` that extends the [`PyUSB 1.0`](https://github.com/pyusb/pyusb) library to provide a `Device` object from a file descriptor number that can be used as usual
 
 ## CP210x Serial module
 
