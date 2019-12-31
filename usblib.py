@@ -50,6 +50,10 @@ CP210x_MHS_DTR_OFF = 0x100
 
 CP210x_PURGE_ALL = 0x000F
 
+SILABSER_FLUSH_REQUEST_CODE = 0x12
+FLUSH_READ_CODE = 0x0A
+FLUSH_WRITE_CODE = 0x05
+
 CP210x_UART_ENABLE = 0x0001
 CP210x_UART_DISABLE = 0x0000
 CP210x_LINE_CTL_DEFAULT = 0x0800
@@ -676,6 +680,19 @@ class CP210xSerial:
         val = struct.unpack("<H", buf.tobytes())[0]
         return val
 
+    def purgeHWBuffer(self, rx, tx):
+        # https://github.com/mik3y/usb-serial-for-android/blob/master/usbSerialForAndroid/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java#L304
+        val = 0x00
+        if rx:
+            val |= FLUSH_READ_CODE
+        if tx:
+            val |= FLUSH_WRITE_CODE
+
+        if not val:
+            return
+
+        self.send_ctrl_cmd(SILABSER_FLUSH_REQUEST_CODE, val, None)
+
     # --------------------------------
 
     @property
@@ -1135,7 +1152,11 @@ class CP210xSerial:
 
 
 def main(fd, debug=True):
-    device = device_from_fd(fd)
+    if hasattr(usb.core, "device_from_fd"):
+        device = usb.core.device_from_fd(fd)
+    else:
+        LOGGER.warning("Patch: device_from_fd")
+        device = device_from_fd(fd)
 
     if debug:
         shell_usbdevice(fd, device)
