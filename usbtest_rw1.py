@@ -44,7 +44,7 @@ def dump_test(ser):
     def dumper():
         while not stop:
             data = ser._buf_in.read(100)
-            text = "".join([chr(v) for v in data])
+            text = "".join(chr(v) for v in data)
             print(text, end="", flush=True)
 
     t = threading.Thread(target=dumper)

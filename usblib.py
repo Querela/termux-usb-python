@@ -171,9 +171,11 @@ def shell_usbdevice(fd, device):
     }
     banner = (
         "Variables:\n"
-        + "\n".join(["{:>12}: {}".format(k, repr(v)) for k, v in namespace.items()])
-        + "\n"
-    )
+        + "\n".join(
+            "{:>12}: {}".format(k, repr(v)) for k, v in namespace.items()
+        )
+    ) + "\n"
+
     shell = InteractiveShellEmbed.instance(banner1=banner, user_ns=namespace)
     shell()
 
@@ -245,7 +247,7 @@ class Buffer:
 
     def contains(self, expected):
         with self.lock:
-            return -1 != self.buf.find(expected)
+            return self.buf.find(expected) != -1
 
     def peek(self, size):
         return self.buf[:size]
@@ -269,10 +271,7 @@ class Timeout:
         self.is_infinite = duration is None
         self.is_non_blocking = duration == 0
         self.duration = duration
-        if duration is not None:
-            self.target_time = self.TIME() + duration
-        else:
-            self.target_time = None
+        self.target_time = self.TIME() + duration if duration is not None else None
 
     def expired(self):
         """Return a boolean, telling if the timeout has expired."""
@@ -286,12 +285,12 @@ class Timeout:
             return None
         else:
             delta = self.target_time - self.TIME()
-            if delta > self.duration:
-                # clock jumped, recalculate
-                self.target_time = self.TIME() + self.duration
-                return self.duration
-            else:
+            if delta <= self.duration:
                 return max(0, delta)
+
+            # clock jumped, recalculate
+            self.target_time = self.TIME() + self.duration
+            return self.duration
 
     def restart(self, duration):
         """\
@@ -463,7 +462,7 @@ class CP210xSerial:
     # --------------------------------
 
     def send_ctrl_cmd(self, request, value=0, data=None, intf=0):
-        ret = self._device.ctrl_transfer(
+        return self._device.ctrl_transfer(
             CP210x_REQTYPE_HOST2DEVICE,
             request,
             wValue=value,
@@ -471,7 +470,6 @@ class CP210xSerial:
             data_or_wLength=data,
             timeout=None,
         )
-        return ret
 
     def recv_ctrl_cmd(self, request, blen, value=0, intf=0):
         buf = usb.util.create_buffer(blen)
@@ -668,17 +666,14 @@ class CP210xSerial:
             self.send_ctrl_cmd(CP210x_SET_MHS, CP210x_MHS_DTR_OFF, None)
 
     def get_modem_state(self):
-        buf = self.recv_ctrl_cmd(CP210x_GET_MDMSTS, 1)
-        return buf
+        return self.recv_ctrl_cmd(CP210x_GET_MDMSTS, 1)
 
     def get_comm_status(self):
-        buf = self.recv_ctrl_cmd(CP210x_GET_COMM_STATUS, 19)
-        return buf
+        return self.recv_ctrl_cmd(CP210x_GET_COMM_STATUS, 19)
 
     def get_CTL(self):
         buf = self.recv_ctrl_cmd(CP210x_GET_LINE_CTL, 2)
-        val = struct.unpack("<H", buf.tobytes())[0]
-        return val
+        return struct.unpack("<H", buf.tobytes())[0]
 
     def purgeHWBuffer(self, rx, tx):
         # https://github.com/mik3y/usb-serial-for-android/blob/master/usbSerialForAndroid/src/main/java/com/hoho/android/usbserial/driver/Cp21xxSerialDriver.java#L304
@@ -806,10 +801,7 @@ class CP210xSerial:
                         delay = DEFAUL_TIMEOUT
                     with buf.changed:
                         buf.changed.wait(delay / 1000.0)
-                if size > 0:
-                    rlen = size - len(data)
-                else:
-                    rlen = size
+                rlen = size - len(data) if size > 0 else size
                 chunk = buf.read_until(expected_last, rlen)
                 data += chunk
 
@@ -862,7 +854,7 @@ class CP210xSerial:
             # check if needle in size limit
             if size > 0 and size < len(buf):
                 data_peek = buf.peek(size)
-                if -1 == data_peek.find(expected):
+                if data_peek.find(expected) == -1:
                     return None
 
             # needle should be in limit
@@ -1101,10 +1093,7 @@ class CP210xSerial:
             return False
 
         ret = self.send_ctrl_cmd(CP210x_SET_MHS, CP210x_MHS_DEFAULT, None)
-        if ret < 0:
-            return False
-
-        return True
+        return ret >= 0
 
     def open(self, _async=True):
         if self._is_open:
@@ -1126,7 +1115,7 @@ class CP210xSerial:
         while True:
             try:
                 data = device.read(endp_in.bEndpointAddress, endp_in.wMaxPacketSize)
-                text = "".join([chr(v) for v in data])
+                text = "".join(chr(v) for v in data)
                 print(text, end="", flush=True)
             except libusb1.USBError:
                 pass
