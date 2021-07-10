@@ -69,7 +69,7 @@ def buf_test(ser):
             if not data:
                 print("    no data")
                 continue
-            text = "".join([chr(v) for v in data])
+            text = "".join(chr(v) for v in data)
             print("    data:", text, end="\n", flush=True)
         print("read stopped")
 
